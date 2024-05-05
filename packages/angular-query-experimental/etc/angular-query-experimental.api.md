@@ -646,7 +646,7 @@ export * from '@tanstack/query-core'
 
 // Warnings were encountered during analysis:
 //
-// src/query-options.ts:27:3 - (ae-forgotten-export) The symbol "NonUndefinedGuard" needs to be exported by the entry point index.d.ts
+// build/query-options.d.ts:14:5 - (ae-forgotten-export) The symbol "NonUndefinedGuard" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 ```
