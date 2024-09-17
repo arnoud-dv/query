@@ -4,9 +4,21 @@ import {
   inject,
   makeEnvironmentProviders,
 } from '@angular/core'
-import { provideQueryClient } from './inject-query-client'
-import type { EnvironmentProviders } from '@angular/core'
+import { onlineManager } from '@tanstack/query-core'
+import { DOCUMENT } from '@angular/common'
+import { QUERY_CLIENT, provideQueryClient } from './inject-query-client'
+import { isDevMode } from './util/is-dev-mode/is-dev-mode'
 import type { QueryClient } from '@tanstack/query-core'
+import type { EnvironmentProviders, Provider } from '@angular/core'
+import type {
+  DevtoolsButtonPosition,
+  DevtoolsErrorType,
+  DevtoolsPosition,
+} from '@tanstack/query-devtools'
+
+// TODO: add possibility to set dev tools options after rendering,
+// e.g. `injectDevtoolsOptions`, should work with signals
+// consider dev tools panel to replace component, e.g. `injectDevToolsPanel`
 
 /**
  * Sets up providers necessary to enable TanStack Query functionality for Angular applications.
@@ -43,12 +55,14 @@ import type { QueryClient } from '@tanstack/query-core'
  * export class AppModule {}
  * ```
  * @param queryClient - A `QueryClient` instance.
+ * @param features - Optional features to configure additional Query functionality.
  * @returns A set of providers to set up TanStack Query.
  * @public
  * @see https://tanstack.com/query/v5/docs/framework/angular/quick-start
  */
 export function provideAngularQuery(
   queryClient: QueryClient,
+  ...features: Array<QueryFeatures>
 ): EnvironmentProviders {
   return makeEnvironmentProviders([
     provideQueryClient(queryClient),
@@ -61,5 +75,128 @@ export function provideAngularQuery(
         inject(DestroyRef).onDestroy(() => queryClient.unmount())
       },
     },
+    features.map((feature) => feature.ɵproviders),
   ])
+}
+
+/**
+ * Helper type to represent a Query feature.
+ * @public
+ */
+export interface QueryFeature<TFeatureKind extends QueryFeatureKind> {
+  ɵkind: TFeatureKind
+  ɵproviders: Array<Provider>
+}
+
+/**
+ * Helper function to create an object that represents a Query feature.
+ * @param kind -
+ * @param providers -
+ */
+function queryFeature<TFeatureKind extends QueryFeatureKind>(
+  kind: TFeatureKind,
+  providers: Array<Provider>,
+): QueryFeature<TFeatureKind> {
+  return { ɵkind: kind, ɵproviders: providers }
+}
+
+/**
+ * A type alias that represents a feature which enables developer tools.
+ * The type is used to describe the return value of the `withDevtools` function.
+ * @public
+ * @see {@link withDevtools}
+ */
+export type DevtoolsFeature = QueryFeature<QueryFeatureKind.DevtoolsFeature>
+
+/**
+ * Options for configuring the TanStack Query devtools.
+ * @public
+ */
+export interface DevtoolsOptions {
+  /**
+   * Set this true if you want the dev tools to default to being open
+   */
+  initialIsOpen?: boolean
+  /**
+   * The position of the TanStack logo to open and close the devtools panel.
+   * `top-left` | `top-right` | `bottom-left` | `bottom-right` | `relative`
+   * Defaults to `bottom-right`.
+   */
+  buttonPosition?: DevtoolsButtonPosition
+  /**
+   * The position of the TanStack Query devtools panel.
+   * `top` | `bottom` | `left` | `right`
+   * Defaults to `bottom`.
+   */
+  position?: DevtoolsPosition
+  /**
+   * Custom instance of QueryClient
+   */
+  client?: QueryClient
+  /**
+   * Use this so you can define custom errors that can be shown in the devtools.
+   */
+  errorTypes?: Array<DevtoolsErrorType>
+  /**
+   * Use this to pass a nonce to the style tag that is added to the document head. This is useful if you are using a Content Security Policy (CSP) nonce to allow inline styles.
+   */
+  styleNonce?: string
+  /**
+   * Use this so you can attach the devtool's styles to a specific element in the DOM.
+   */
+  shadowDOMTarget?: ShadowRoot
+}
+
+/**
+ * Adds developer tools.
+ * @param options
+ * @see `provideAngularQuery`
+ */
+export function withDevtools(options: DevtoolsOptions = {}): DevtoolsFeature {
+  let providers: Array<Provider> = []
+  if (isDevMode()) {
+    providers = [
+      {
+        provide: ENVIRONMENT_INITIALIZER,
+        multi: true,
+        useFactory: () => {
+          return () => {
+            const doc = inject(DOCUMENT)
+            const destroyRef = inject(DestroyRef)
+            const el = doc.body.appendChild(document.createElement('div'))
+            el.classList.add('tsqd-parent-container')
+            const client = inject(QUERY_CLIENT)
+            import('@tanstack/query-devtools').then((queryDevtools) => {
+              const devtools = new queryDevtools.TanstackQueryDevtools({
+                ...options,
+                client,
+                queryFlavor: 'Angular Query',
+                version: '5',
+                onlineManager,
+              })
+              destroyRef.onDestroy(() => devtools.unmount())
+              devtools.mount(el)
+            })
+          }
+        },
+      },
+    ]
+  } else {
+    providers = []
+  }
+  return queryFeature(QueryFeatureKind.DevtoolsFeature, providers)
+}
+
+/**
+ * A type alias that represents all Query features available for use with `provideAngularQuery`.
+ * Features can be enabled by adding special functions to the `provideAngularQuery` call.
+ * See documentation for each symbol to find corresponding function name. See also `provideAngularQuery`
+ * documentation on how to use those functions.
+ * @public
+ * @see {@link provideAngularQuery}
+ */
+export type QueryFeatures = DevtoolsFeature // Union type of features but just one now
+
+export enum QueryFeatureKind {
+  DevtoolsFeature,
 }
