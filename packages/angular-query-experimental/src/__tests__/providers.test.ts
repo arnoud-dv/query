@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { QueryClient } from '@tanstack/query-core'
 import { TestBed } from '@angular/core/testing'
 import { ENVIRONMENT_INITIALIZER } from '@angular/core'
 import { isDevMode } from '../util/is-dev-mode/is-dev-mode'
 import { provideAngularQuery, withDeveloperTools } from '../providers'
+import type { DeveloperToolsOptions } from '../providers'
 import type { Mock } from 'vitest'
 
 vi.mock('../util/is-dev-mode/is-dev-mode', () => ({
@@ -33,65 +34,87 @@ describe('withDeveloperTools feature', () => {
     vi.restoreAllMocks()
   })
 
-  test('by default provides developer tools in development mode', async () => {
-    isDevModeMock.mockReturnValue(true)
+  test.each([
+    {
+      description:
+        'should provide developer tools in development mode by default',
+      isDevModeValue: true,
+      expectedCalled: true,
+    },
+    {
+      description:
+        'should not provide developer tools in production mode by default',
+      isDevModeValue: false,
+      expectedCalled: false,
+    },
+    {
+      description: `should provide developer tools in development mode when 'loadDeveloperTools' is set to 'enabledInDevelopmentMode'`,
+      isDevModeValue: true,
+      loadDeveloperTools: 'enabledInDevelopmentMode',
+      expectedCalled: true,
+    },
+    {
+      description: `should not provide developer tools in production mode when 'loadDeveloperTools' is set to 'enabledInDevelopmentMode'`,
+      isDevModeValue: false,
+      loadDeveloperTools: 'enabledInDevelopmentMode',
+      expectedCalled: false,
+    },
+    {
+      description:
+        "should provide developer tools in development mode when 'loadDeveloperTools' is set to 'enabled'",
+      isDevModeValue: true,
+      loadDeveloperTools: 'enabled',
+      expectedCalled: true,
+    },
+    {
+      description:
+        "should provide developer tools in production mode when 'loadDeveloperTools' is set to 'enabled'",
+      isDevModeValue: false,
+      loadDeveloperTools: 'enabled',
+      expectedCalled: true,
+    },
+    {
+      description:
+        "should not provide developer tools in development mode when 'loadDeveloperTools' is set to 'disabled'",
+      isDevModeValue: true,
+      loadDeveloperTools: 'disabled',
+      expectedCalled: false,
+    },
+    {
+      description:
+        "should not provide developer tools in production mode when 'loadDeveloperTools' is set to 'disabled'",
+      isDevModeValue: false,
+      loadDeveloperTools: 'disabled',
+      expectedCalled: false,
+    },
+  ])(
+    '$description',
+    async ({ isDevModeValue, loadDeveloperTools, expectedCalled }) => {
+      isDevModeMock.mockReturnValue(isDevModeValue)
 
-    TestBed.configureTestingModule({
-      providers: [provideAngularQuery(new QueryClient(), withDeveloperTools())],
-    })
-
-    TestBed.inject(ENVIRONMENT_INITIALIZER)
-    await vi.runAllTimersAsync()
-    expect(mockTanstackQueryDevtools).toHaveBeenCalled()
-  })
-
-  test('by default does not provide developer tools in production mode', async () => {
-    isDevModeMock.mockReturnValue(false)
-
-    TestBed.configureTestingModule({
-      providers: [provideAngularQuery(new QueryClient(), withDeveloperTools())],
-    })
-
-    TestBed.inject(ENVIRONMENT_INITIALIZER)
-    await vi.runAllTimersAsync()
-    expect(mockTanstackQueryDevtools).not.toHaveBeenCalled()
-  })
-
-  describe(`when 'loadDeveloperTools' is set to 'enabled'`, () => {
-    test('provides developer tools in production mode', async () => {
-      isDevModeMock.mockReturnValue(false)
+      const providers = [
+        provideAngularQuery(
+          new QueryClient(),
+          loadDeveloperTools !== undefined
+            ? withDeveloperTools({
+                loadDeveloperTools,
+              } as DeveloperToolsOptions)
+            : withDeveloperTools(),
+        ),
+      ]
 
       TestBed.configureTestingModule({
-        providers: [
-          provideAngularQuery(
-            new QueryClient(),
-            withDeveloperTools({ loadDeveloperTools: 'enabled' }),
-          ),
-        ],
+        providers,
       })
 
       TestBed.inject(ENVIRONMENT_INITIALIZER)
       await vi.runAllTimersAsync()
-      expect(mockTanstackQueryDevtools).toHaveBeenCalled()
-    })
-  })
 
-  describe(`when 'loadDeveloperTools' is set to 'disabled'`, () => {
-    test('should not provide developer tools in development mode', async () => {
-      isDevModeMock.mockReturnValue(true)
-
-      TestBed.configureTestingModule({
-        providers: [
-          provideAngularQuery(
-            new QueryClient(),
-            withDeveloperTools({ loadDeveloperTools: 'disabled' }),
-          ),
-        ],
-      })
-
-      TestBed.inject(ENVIRONMENT_INITIALIZER)
-      await vi.runAllTimersAsync()
-      expect(mockTanstackQueryDevtools).not.toHaveBeenCalled()
-    })
-  })
+      if (expectedCalled) {
+        expect(mockTanstackQueryDevtools).toHaveBeenCalled()
+      } else {
+        expect(mockTanstackQueryDevtools).not.toHaveBeenCalled()
+      }
+    },
+  )
 })
