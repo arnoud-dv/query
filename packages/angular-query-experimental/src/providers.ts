@@ -126,13 +126,14 @@ function queryFeature<TFeatureKind extends QueryFeatureKind>(
  * @public
  * @see {@link withDeveloperTools}
  */
-export type DevtoolsFeature = QueryFeature<QueryFeatureKind.DevtoolsFeature>
+export type DeveloperToolsFeature =
+  QueryFeature<QueryFeatureKind.DeveloperToolsFeature>
 
 /**
  * Options for configuring the TanStack Query devtools.
  * @public
  */
-export interface DevtoolsOptions {
+export interface DeveloperToolsOptions {
   /**
    * Set this true if you want the dev tools to default to being open
    */
@@ -204,10 +205,13 @@ export interface DevtoolsOptions {
  * @returns A set of providers for use with `provideAngularQuery`.
  */
 export function withDeveloperTools(
-  options: DevtoolsOptions = {},
-): DevtoolsFeature {
+  options: DeveloperToolsOptions = {},
+): DeveloperToolsFeature {
   let providers: Array<Provider> = []
-  if (isDevMode()) {
+  if (
+    (isDevMode() && options.loadDeveloperTools !== 'disabled') ||
+    options.loadDeveloperTools === 'enabled'
+  ) {
     providers = [
       {
         provide: ENVIRONMENT_INITIALIZER,
@@ -237,7 +241,7 @@ export function withDeveloperTools(
   } else {
     providers = []
   }
-  return queryFeature(QueryFeatureKind.DevtoolsFeature, providers)
+  return queryFeature(QueryFeatureKind.DeveloperToolsFeature, providers)
 }
 
 /**
@@ -248,8 +252,8 @@ export function withDeveloperTools(
  * @public
  * @see {@link provideAngularQuery}
  */
-export type QueryFeatures = DevtoolsFeature // Union type of features but just one now
+export type QueryFeatures = DeveloperToolsFeature // Union type of features but just one now
 
-export enum QueryFeatureKind {
-  DevtoolsFeature,
+export const enum QueryFeatureKind {
+  DeveloperToolsFeature,
 }

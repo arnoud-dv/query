@@ -57,5 +57,41 @@ describe('withDeveloperTools feature', () => {
     expect(mockTanstackQueryDevtools).not.toHaveBeenCalled()
   })
 
-  test('provides developer tools in production mode when QUERY_DEV_TOOLS (TODO: change name) is true', () => {})
+  describe(`when 'loadDeveloperTools' is set to 'enabled'`, () => {
+    test('provides developer tools in production mode', async () => {
+      isDevModeMock.mockReturnValue(false)
+
+      TestBed.configureTestingModule({
+        providers: [
+          provideAngularQuery(
+            new QueryClient(),
+            withDeveloperTools({ loadDeveloperTools: 'enabled' }),
+          ),
+        ],
+      })
+
+      TestBed.inject(ENVIRONMENT_INITIALIZER)
+      await vi.runAllTimersAsync()
+      expect(mockTanstackQueryDevtools).toHaveBeenCalled()
+    })
+  })
+
+  describe(`when 'loadDeveloperTools' is set to 'disabled'`, () => {
+    test('should not provide developer tools in development mode', async () => {
+      isDevModeMock.mockReturnValue(true)
+
+      TestBed.configureTestingModule({
+        providers: [
+          provideAngularQuery(
+            new QueryClient(),
+            withDeveloperTools({ loadDeveloperTools: 'disabled' }),
+          ),
+        ],
+      })
+
+      TestBed.inject(ENVIRONMENT_INITIALIZER)
+      await vi.runAllTimersAsync()
+      expect(mockTanstackQueryDevtools).not.toHaveBeenCalled()
+    })
+  })
 })

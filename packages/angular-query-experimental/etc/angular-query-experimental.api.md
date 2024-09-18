@@ -125,10 +125,10 @@ export type DefinedInitialDataOptions<TQueryFnData = unknown, TError = DefaultEr
 };
 
 // @public
-export type DevtoolsFeature = QueryFeature<QueryFeatureKind.DevtoolsFeature>;
+export type DeveloperToolsFeature = QueryFeature<QueryFeatureKind.DeveloperToolsFeature>;
 
 // @public
-export interface DevtoolsOptions {
+export interface DeveloperToolsOptions {
     buttonPosition?: DevtoolsButtonPosition;
     client?: QueryClient;
     errorTypes?: Array<DevtoolsErrorType>;
@@ -255,13 +255,13 @@ export interface QueryFeature<TFeatureKind extends QueryFeatureKind> {
 }
 
 // @public (undocumented)
-export enum QueryFeatureKind {
+export const enum QueryFeatureKind {
     // (undocumented)
-    DevtoolsFeature = 0
+    DeveloperToolsFeature = 0
 }
 
 // @public
-export type QueryFeatures = DevtoolsFeature;
+export type QueryFeatures = DeveloperToolsFeature;
 
 // @public
 export function queryOptions<TQueryFnData = unknown, TError = DefaultError, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>(options: DefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey>): DefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey> & {
@@ -284,7 +284,7 @@ export type UndefinedInitialDataOptions<TQueryFnData = unknown, TError = Default
 };
 
 // @public
-export function withDeveloperTools(options?: DevtoolsOptions): DevtoolsFeature;
+export function withDeveloperTools(options?: DeveloperToolsOptions): DeveloperToolsFeature;
 
 
 export * from "@tanstack/query-core";
