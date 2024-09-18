@@ -8,11 +8,15 @@ import type { DataTag } from '@tanstack/query-core';
 import type { DefaultError } from '@tanstack/query-core';
 import type { DefinedInfiniteQueryObserverResult } from '@tanstack/query-core';
 import type { DefinedQueryObserverResult } from '@tanstack/query-core';
+import type { DevtoolsButtonPosition } from '@tanstack/query-devtools';
+import type { DevtoolsErrorType } from '@tanstack/query-devtools';
+import type { DevtoolsPosition } from '@tanstack/query-devtools';
 import type { EnvironmentProviders } from '@angular/core';
 import type { InfiniteData } from '@tanstack/query-core';
 import type { InfiniteQueryObserverOptions } from '@tanstack/query-core';
 import type { InfiniteQueryObserverResult } from '@tanstack/query-core';
 import type { InitialDataFunction } from '@tanstack/query-core';
+import { InjectionToken } from '@angular/core';
 import { InjectOptions } from '@angular/core';
 import { Injector } from '@angular/core';
 import type { MutateFunction } from '@tanstack/query-core';
@@ -121,6 +125,21 @@ export type DefinedInitialDataOptions<TQueryFnData = unknown, TError = DefaultEr
 };
 
 // @public
+export type DevtoolsFeature = QueryFeature<QueryFeatureKind.DevtoolsFeature>;
+
+// @public
+export interface DevtoolsOptions {
+    buttonPosition?: DevtoolsButtonPosition;
+    client?: QueryClient;
+    errorTypes?: Array<DevtoolsErrorType>;
+    initialIsOpen?: boolean;
+    loadDeveloperTools?: 'enabledInDevelopmentMode' | 'enabled' | 'disabled';
+    position?: DevtoolsPosition;
+    shadowDOMTarget?: ShadowRoot;
+    styleNonce?: string;
+}
+
+// @public
 export function infiniteQueryOptions<TQueryFnData, TError = DefaultError, TData = InfiniteData<TQueryFnData>, TQueryKey extends QueryKey = QueryKey, TPageParam = unknown>(options: DefinedInitialDataInfiniteOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>): DefinedInitialDataInfiniteOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam> & {
     queryKey: DataTag<TQueryKey, InfiniteData<TQueryFnData>>;
 };
@@ -191,7 +210,7 @@ export const injectQueryClient: {
 export type NonUndefinedGuard<T> = T extends undefined ? never : T;
 
 // @public
-export function provideAngularQuery(queryClient: QueryClient): EnvironmentProviders;
+export function provideAngularQuery(queryClient: QueryClient, ...features: Array<QueryFeatures>): EnvironmentProviders;
 
 // @public
 export const provideQueryClient: ((value: QueryClient | (() => QueryClient)) => Provider) & ((value: QueryClient | (() => QueryClient)) => Provider);
@@ -224,6 +243,26 @@ GetResults<Head>
 1
 ]> : T extends Array<QueryObserverOptionsForCreateQueries<infer TQueryFnData, infer TError, infer TData, any>> ? Array<QueryObserverResult<unknown extends TData ? TQueryFnData : TData, unknown extends TError ? DefaultError : TError>> : Array<QueryObserverResult>;
 
+// @public (undocumented)
+export const QUERY_CLIENT: InjectionToken<QueryClient>;
+
+// @public
+export interface QueryFeature<TFeatureKind extends QueryFeatureKind> {
+    // (undocumented)
+    ɵkind: TFeatureKind;
+    // (undocumented)
+    ɵproviders: Array<Provider>;
+}
+
+// @public (undocumented)
+export enum QueryFeatureKind {
+    // (undocumented)
+    DevtoolsFeature = 0
+}
+
+// @public
+export type QueryFeatures = DevtoolsFeature;
+
 // @public
 export function queryOptions<TQueryFnData = unknown, TError = DefaultError, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>(options: DefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey>): DefinedInitialDataOptions<TQueryFnData, TError, TData, TQueryKey> & {
     queryKey: DataTag<TQueryKey, TQueryFnData>;
@@ -243,6 +282,9 @@ export type UndefinedInitialDataInfiniteOptions<TQueryFnData, TError = DefaultEr
 export type UndefinedInitialDataOptions<TQueryFnData = unknown, TError = DefaultError, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey> = CreateQueryOptions<TQueryFnData, TError, TData, TQueryKey> & {
     initialData?: undefined | InitialDataFunction<NonUndefinedGuard<TQueryFnData>>;
 };
+
+// @public
+export function withDeveloperTools(options?: DevtoolsOptions): DevtoolsFeature;
 
 
 export * from "@tanstack/query-core";

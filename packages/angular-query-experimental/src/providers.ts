@@ -54,11 +54,31 @@ import type {
  * })
  * export class AppModule {}
  * ```
+ *
+ * You can also enable optional developer tools by adding `withDeveloperTools`. By
+ * default the tools will then be loaded when your app is in development mode.
+ * ```ts
+ * import {
+ *   provideAngularQuery,
+ *   withDeveloperTools
+ *   QueryClient,
+ * } from '@tanstack/angular-query-experimental'
+ *
+ * bootstrapApplication(AppComponent,
+ *   {
+ *     providers: [
+ *       provideAngularQuery(new QueryClient(), withDeveloperTools())
+ *     ]
+ *   }
+ * )
+ * ```
+ *
  * @param queryClient - A `QueryClient` instance.
  * @param features - Optional features to configure additional Query functionality.
  * @returns A set of providers to set up TanStack Query.
  * @public
  * @see https://tanstack.com/query/v5/docs/framework/angular/quick-start
+ * @see withDeveloperTools
  */
 export function provideAngularQuery(
   queryClient: QueryClient,
@@ -102,9 +122,9 @@ function queryFeature<TFeatureKind extends QueryFeatureKind>(
 
 /**
  * A type alias that represents a feature which enables developer tools.
- * The type is used to describe the return value of the `withDevtools` function.
+ * The type is used to describe the return value of the `withDeveloperTools` function.
  * @public
- * @see {@link withDevtools}
+ * @see {@link withDeveloperTools}
  */
 export type DevtoolsFeature = QueryFeature<QueryFeatureKind.DevtoolsFeature>
 
@@ -145,6 +165,17 @@ export interface DevtoolsOptions {
    * Use this so you can attach the devtool's styles to a specific element in the DOM.
    */
   shadowDOMTarget?: ShadowRoot
+
+  /**
+   * Whether developer tools are loaded.
+   * * `enabledInDevelopmentMode`- (Default) Lazily loads developer tools when in development mode. Skips loading in production mode.
+   * * `enabled`- Lazily loads the developer tools in both production and development mode.
+   * * `disabled`- Does not load developer tools.
+
+   * You can use `enabled` and `disabled` to override loading developer tools from an environment file.
+   * For example, a test environment might run in production mode but you may want to enable developer tools.
+   */
+  loadDeveloperTools?: 'enabledInDevelopmentMode' | 'enabled' | 'disabled'
 }
 
 /**
@@ -152,7 +183,29 @@ export interface DevtoolsOptions {
  * @param options
  * @see `provideAngularQuery`
  */
-export function withDevtools(options: DevtoolsOptions = {}): DevtoolsFeature {
+
+/**
+ * Enables developer tools.
+ *
+ * **Example**
+ *
+ * ```ts
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideAngularQuery(new QueryClient(), withDeveloperTools())
+ *   ]
+ * }
+ * ```
+ *
+ * @see {@link provideAngularQuery}
+ * @public
+ * @param options Set of configuration parameters to customize scrolling behavior, see
+ *     `InMemoryScrollingOptions` for additional information.
+ * @returns A set of providers for use with `provideAngularQuery`.
+ */
+export function withDeveloperTools(
+  options: DevtoolsOptions = {},
+): DevtoolsFeature {
   let providers: Array<Provider> = []
   if (isDevMode()) {
     providers = [

@@ -5,28 +5,8 @@ title: Devtools
 
 ## Install and Import the Devtools
 
-The devtools are a separate package that you need to install:
 
-```bash
-npm i @tanstack/angular-query-devtools-experimental
-```
 
-or
-
-```bash
-pnpm add @tanstack/angular-query-devtools-experimental
-```
-
-or
-
-```bash
-yarn add @tanstack/angular-query-devtools-experimental
-```
-
-or
-
-```bash
-bun add @tanstack/angular-query-devtools-experimental
 ```
 
 You can import the devtools like this:

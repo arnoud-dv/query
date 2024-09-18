@@ -3,7 +3,7 @@ import { QueryClient } from '@tanstack/query-core'
 import { TestBed } from '@angular/core/testing'
 import { ENVIRONMENT_INITIALIZER } from '@angular/core'
 import { isDevMode } from '../util/is-dev-mode/is-dev-mode'
-import { provideAngularQuery, withDevtools } from '../providers'
+import { provideAngularQuery, withDeveloperTools } from '../providers'
 import type { Mock } from 'vitest'
 
 vi.mock('../util/is-dev-mode/is-dev-mode', () => ({
@@ -21,7 +21,7 @@ vi.mock('@tanstack/query-devtools', () => ({
   TanstackQueryDevtools: mockTanstackQueryDevtools,
 }))
 
-describe('withDevtools feature', () => {
+describe('withDeveloperTools feature', () => {
   let isDevModeMock: Mock
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('withDevtools feature', () => {
     isDevModeMock.mockReturnValue(true)
 
     TestBed.configureTestingModule({
-      providers: [provideAngularQuery(new QueryClient(), withDevtools())],
+      providers: [provideAngularQuery(new QueryClient(), withDeveloperTools())],
     })
 
     TestBed.inject(ENVIRONMENT_INITIALIZER)
@@ -49,7 +49,7 @@ describe('withDevtools feature', () => {
     isDevModeMock.mockReturnValue(false)
 
     TestBed.configureTestingModule({
-      providers: [provideAngularQuery(new QueryClient(), withDevtools())],
+      providers: [provideAngularQuery(new QueryClient(), withDeveloperTools())],
     })
 
     TestBed.inject(ENVIRONMENT_INITIALIZER)

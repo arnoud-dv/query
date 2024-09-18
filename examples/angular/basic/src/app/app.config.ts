@@ -2,7 +2,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http'
 import {
   QueryClient,
   provideAngularQuery,
-  withDevtools,
+  withDeveloperTools,
 } from '@tanstack/angular-query-experimental'
 import type { ApplicationConfig } from '@angular/core'
 
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
           },
         },
       }),
-      withDevtools(),
+      withDeveloperTools(),
     ),
     provideHttpClient(withFetch()),
   ],
