@@ -3,37 +3,60 @@ id: devtools
 title: Devtools
 ---
 
-## Install and Import the Devtools
+## Enable developer tools
 
+The developer tools help you debug and inspect your queries and mutations. You can enable the developer tools by adding `withDeveloperTools` to `provideAngularQuery`.
 
-
-```
-
-You can import the devtools like this:
+By default, the developer tools are enabled when Angular [`isDevMode`](https://angular.dev/api/core/isDevMode) returns true. So you don't need to worry about excluding them during a production build. The tools are lazily loaded and not included in bundled code.
 
 ```ts
-import { AngularQueryDevtools } from '@tanstack/angular-query-devtools-experimental'
+import {
+  QueryClient,
+  provideAngularQuery,
+  withDeveloperTools,
+} from '@tanstack/angular-query-experimental'
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideAngularQuery(new QueryClient(), withDeveloperTools())],
+}
 ```
 
-## Floating Mode
+## Overriding if developer tools are loaded
 
-Floating Mode will mount the devtools as a fixed, floating element in your app and provide a toggle in the corner of the screen to show and hide the devtools. This toggle state will be stored and remembered in localStorage across reloads.
+If you want more control over if the developer tools are loaded, you can use the `loadDeveloperTools` option. This is useful when you want to load development tools based on [environment configurations](https://angular.dev/tools/cli/environments#).
+For example, you may have a test environment that is running in production mode but you want developer tools to be available.
 
-Place the following code as high in your Angular app as you can. The closer it is to the root of the page, the better it will work!
+When not setting the option or setting it to 'enabledInDevelopmentMode', the developer tools will be loaded when Angular is in development mode.
 
-```angular-ts
-import { AngularQueryDevtools } from '@tanstack/angular-query-devtools-experimental'
-import { Component } from '@angular/core';
+```ts
+provideAngularQuery(new QueryClient(), withDeveloperTools())
 
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [AngularQueryDevtools],
-  template: `
-   <angular-query-devtools initialIsOpen />
-  `,
-})
+// which is equivalent to
+provideAngularQuery(
+  new QueryClient(),
+  withDeveloperTools({ loadDeveloperTools: 'enabledInDevelopmentMode' }),
+)
 ```
+
+When setting the option to 'enabled', the developer tools will be loaded in both development and production mode.
+
+```ts
+provideAngularQuery(
+  new QueryClient(),
+  withDeveloperTools({ loadDeveloperTools: 'enabled' }),
+)
+```
+
+When setting the option to 'disabled', the developer tools will not be loaded.
+
+```ts
+provideAngularQuery(
+  new QueryClient(),
+  withDeveloperTools({ loadDeveloperTools: 'disabled' }),
+)
+```
+
+## TODO: Add more details and examples about Angular environment configurations
 
 ### Options
 
