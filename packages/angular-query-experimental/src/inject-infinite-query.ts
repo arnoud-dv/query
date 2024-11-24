@@ -1,6 +1,7 @@
 import { InfiniteQueryObserver } from '@tanstack/query-core'
 import { createBaseQuery } from './create-base-query'
 import { assertInjector } from './util/assert-injector/assert-injector'
+import { signalProxy } from './signal-proxy'
 import type { Injector } from '@angular/core'
 import type {
   DefaultError,
@@ -107,6 +108,8 @@ export function injectInfiniteQuery(
   injector?: Injector,
 ) {
   return assertInjector(injectInfiniteQuery, injector, () =>
-    createBaseQuery(optionsFn, InfiniteQueryObserver as typeof QueryObserver),
+    signalProxy(
+      createBaseQuery(optionsFn, InfiniteQueryObserver as typeof QueryObserver),
+    ),
   )
 }

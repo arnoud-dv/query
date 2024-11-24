@@ -1,6 +1,7 @@
 import { QueryObserver } from '@tanstack/query-core'
 import { assertInjector } from './util/assert-injector/assert-injector'
 import { createBaseQuery } from './create-base-query'
+import { signalProxy } from './signal-proxy'
 import type { Injector } from '@angular/core'
 import type { DefaultError, QueryKey } from '@tanstack/query-core'
 import type {
@@ -206,6 +207,6 @@ export function injectQuery(
   injector?: Injector,
 ) {
   return assertInjector(injectQuery, injector, () =>
-    createBaseQuery(optionsFn, QueryObserver),
+    signalProxy(createBaseQuery(optionsFn, QueryObserver)),
   )
 }

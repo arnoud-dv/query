@@ -127,16 +127,15 @@ export type CreateBaseQueryResult<
 export type CreateQueryResult<
   TData = unknown,
   TError = DefaultError,
-> = CreateBaseQueryResult<TData, TError>
+> = MapToSignals<QueryObserverResult<TData, TError>>
 
 /**
  * @public
  */
 export type DefinedCreateQueryResult<
   TData = unknown,
-  TError = DefaultError,
-  TDefinedQueryObserver = DefinedQueryObserverResult<TData, TError>,
-> = MapToSignals<TDefinedQueryObserver>
+  TError = DefaultError
+> = MapToSignals<DefinedQueryObserverResult<TData, TError>>
 
 /**
  * @public

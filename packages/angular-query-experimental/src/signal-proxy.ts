@@ -1,8 +1,9 @@
 import { computed, untracked } from '@angular/core'
 import type { Signal } from '@angular/core'
+import type { NonUndefinedGuard } from './types'
 
 export type MapToSignals<T> = {
-  [K in keyof T]: T[K] extends Function ? T[K] : Signal<T[K]>
+  [K in keyof T]: T[K] extends Function ? T[K] : Signal<NonUndefinedGuard<T[K]> | undefined>
 }
 
 /**

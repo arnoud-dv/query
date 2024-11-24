@@ -10,7 +10,6 @@ import {
   untracked,
 } from '@angular/core'
 import { QueryClient, notifyManager } from '@tanstack/query-core'
-import { signalProxy } from './signal-proxy'
 import { shouldThrowError } from './util'
 import { lazyInit } from './util/lazy-init/lazy-init'
 import type {
@@ -18,7 +17,7 @@ import type {
   QueryObserver,
   QueryObserverResult,
 } from '@tanstack/query-core'
-import type { CreateBaseQueryOptions, CreateBaseQueryResult } from './types'
+import type { CreateBaseQueryOptions } from './types'
 
 /**
  * Base implementation for `injectQuery` and `injectInfiniteQuery`.
@@ -38,7 +37,7 @@ export function createBaseQuery<
     TQueryKey
   >,
   Observer: typeof QueryObserver,
-): CreateBaseQueryResult<TData, TError> {
+) {
   const injector = inject(Injector)
   return lazyInit(() => {
     const ngZone = injector.get(NgZone)
@@ -108,6 +107,6 @@ export function createBaseQuery<
     )
     destroyRef.onDestroy(unsubscribe)
 
-    return signalProxy(resultSignal) as CreateBaseQueryResult<TData, TError>
+    return resultSignal.asReadonly()
   })
 }
